@@ -13,7 +13,7 @@ from sae_utils import AmlifySAEHook
 def get_output_score(
         layer, feature, logit_lens_indices,
         sentence, sae, tokenizer,
-        model, device, amp_factor=10
+        model, device, amp_factor=-10
 ):
     model = model.to(device)
     sae = sae.to(device)
