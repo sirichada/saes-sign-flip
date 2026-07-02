@@ -97,6 +97,10 @@ def main():
     for layer in features_by_layers:
         features = features_by_layers[layer]
 
+        if all(f"{layer}_{int(feature)}" in output_scores for feature in features):
+            print(f"Skipping layer {layer}, already cached")
+            continue
+
         sae = get_sae(model_type, layer, saes)
         model = model.cpu()
         logit_lens_topk, logit_lens_confidence, logit_lens_raw_logits = cache_logit_lens(layer, saes, model_type,
@@ -119,6 +123,11 @@ def main():
 
         with open(args.cache_path, "w") as f:
             json.dump(output_scores, f)
+
+        # Each layer's SAE is only needed while processing that layer; drop it
+        # afterward so retained SAEs don't accumulate across all 26 layers.
+        saes.pop(layer, None)
+        gc.collect()
 
 
 if __name__ == "__main__":
