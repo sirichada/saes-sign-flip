@@ -136,6 +136,7 @@ def main():
 
     with open(args.output_scores_cache_path, "r") as f:
         output_scores_cache = json.load(f)
+        output_scores_cache = output_scores_cache.get("scores", output_scores_cache)
 
     with open(args.input_scores_cache_path, "r") as f:
         input_scores_cache = json.load(f)

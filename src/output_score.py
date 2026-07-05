@@ -58,6 +58,7 @@ def parse_args():
     parser.add_argument('--logit_lens_top_k', type=int, default=20)
     parser.add_argument('--features_file', type=str)
     parser.add_argument('--cache_path', type=str)
+    parser.add_argument('--amp_factor', type=float, default=-10)
     return parser.parse_args()
 
 
@@ -90,7 +91,23 @@ def main():
 
     if os.path.exists(args.cache_path):
         with open(args.cache_path, "r") as f:
-            output_scores = json.load(f)
+            cache_data = json.load(f)
+        if not (isinstance(cache_data, dict) and "meta" in cache_data and "scores" in cache_data):
+            raise ValueError(
+                f"{args.cache_path} is an old flat-format cache (no 'meta'/'scores' keys) and "
+                f"does not record which amp_factor produced it. Migrate it to the new format "
+                f"manually (wrap it as {{'meta': {{'amp_factor': ..., 'model_type': ..., "
+                f"'logit_lens_top_k': ...}}, 'scores': <old contents>}}) before using it with "
+                f"this script."
+            )
+        cached_amp_factor = cache_data["meta"]["amp_factor"]
+        if cached_amp_factor != args.amp_factor:
+            raise ValueError(
+                f"{args.cache_path} was produced with amp_factor={cached_amp_factor}, but this "
+                f"run requested amp_factor={args.amp_factor}. Refusing to mix scores from "
+                f"different amp_factor values into the same cache file."
+            )
+        output_scores = cache_data["scores"]
     else:
         output_scores = dict()
 
@@ -115,14 +132,21 @@ def main():
             output_score = get_output_score(
                 layer, feature, logit_lens_tokens_indices, neutral_sentence,
                 sae, tokenizer,
-                model, device
+                model, device, amp_factor=args.amp_factor
             )
             torch.cuda.empty_cache()
             gc.collect()
             output_scores[layer_feature_key] = output_score
 
         with open(args.cache_path, "w") as f:
-            json.dump(output_scores, f)
+            json.dump({
+                "meta": {
+                    "amp_factor": args.amp_factor,
+                    "model_type": model_type,
+                    "logit_lens_top_k": logit_lens_k,
+                },
+                "scores": output_scores,
+            }, f)
 
         # Each layer's SAE is only needed while processing that layer; drop it
         # afterward so retained SAEs don't accumulate across all 26 layers.
