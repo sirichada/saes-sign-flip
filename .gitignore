@@ -3,3 +3,5 @@
 *.pyc
 CLAUDE.local.md
 *.log
+.DS_Store
+**/.DS_Store

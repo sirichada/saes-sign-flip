@@ -13,11 +13,11 @@ from sae_utils import AmlifySAEHook
 def get_output_score(
         layer, feature, logit_lens_indices,
         sentence, sae, tokenizer,
-        model, device, amp_factor=-10
+        model, device, amp_factor=-10, mode="amplify", log_diag=False
 ):
     model = model.to(device)
     sae = sae.to(device)
-    sae_hook = AmlifySAEHook(layer, sae, [feature], amp_factor, device)
+    sae_hook = AmlifySAEHook(layer, sae, [feature], amp_factor, device, mode=mode, log_diag=log_diag)
     model_block_to_hook = model.model.layers[layer]
     handle = model_block_to_hook.register_forward_hook(sae_hook, always_call=True)
 
@@ -26,6 +26,8 @@ def get_output_score(
         inputs[k] = v.to(model.device)
 
     outputs = model(**inputs)
+
+    diag = sae_hook.diag
 
     for k, v in inputs.items():
         inputs[k] = v.cpu()
@@ -49,7 +51,7 @@ def get_output_score(
     torch.cuda.empty_cache()
     gc.collect()
 
-    return rank_output_score * top_token_score
+    return rank_output_score * top_token_score, diag
 
 
 def parse_args():
@@ -59,6 +61,8 @@ def parse_args():
     parser.add_argument('--features_file', type=str)
     parser.add_argument('--cache_path', type=str)
     parser.add_argument('--amp_factor', type=float, default=-10)
+    parser.add_argument('--intervention', type=str, choices=["amplify", "zero"], default="amplify")
+    parser.add_argument('--log_recon_error', action="store_true")
     return parser.parse_args()
 
 
@@ -107,9 +111,18 @@ def main():
                 f"run requested amp_factor={args.amp_factor}. Refusing to mix scores from "
                 f"different amp_factor values into the same cache file."
             )
+        cached_intervention = cache_data["meta"].get("intervention", "amplify")
+        if cached_intervention != args.intervention:
+            raise ValueError(
+                f"{args.cache_path} was produced with intervention={cached_intervention}, but this "
+                f"run requested intervention={args.intervention}. Refusing to mix scores from "
+                f"different intervention modes into the same cache file."
+            )
         output_scores = cache_data["scores"]
+        diagnostics = cache_data.get("diagnostics", dict())
     else:
         output_scores = dict()
+        diagnostics = dict()
 
     for layer in features_by_layers:
         features = features_by_layers[layer]
@@ -129,14 +142,17 @@ def main():
             layer_feature_key = f"{layer}_{feature}"
             feature = int(feature)
             logit_lens_tokens_indices = logit_lens_topk.indices[feature, :].tolist()
-            output_score = get_output_score(
+            output_score, diag = get_output_score(
                 layer, feature, logit_lens_tokens_indices, neutral_sentence,
                 sae, tokenizer,
-                model, device, amp_factor=args.amp_factor
+                model, device, amp_factor=args.amp_factor,
+                mode=args.intervention, log_diag=args.log_recon_error
             )
             torch.cuda.empty_cache()
             gc.collect()
             output_scores[layer_feature_key] = output_score
+            if diag is not None:
+                diagnostics[layer_feature_key] = diag
 
         with open(args.cache_path, "w") as f:
             json.dump({
@@ -144,8 +160,10 @@ def main():
                     "amp_factor": args.amp_factor,
                     "model_type": model_type,
                     "logit_lens_top_k": logit_lens_k,
+                    "intervention": args.intervention,
                 },
                 "scores": output_scores,
+                "diagnostics": diagnostics,
             }, f)
 
         # Each layer's SAE is only needed while processing that layer; drop it
