@@ -2,6 +2,9 @@
 **/__pycache__/
 *.pyc
 CLAUDE.local.md
+CLAUDE.md
+docs/
+.claude/
 *.log
 .DS_Store
 **/.DS_Store
