@@ -191,7 +191,7 @@ def main():
                  "effect, and whether the decision gate for the 'true suppression' extension opens._\n")
 
     out = f"{CACHE_DIR}/step3_reconstruction_error.md"
-    with open(out, "w") as f:
+    with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"\nWrote {out}")
 

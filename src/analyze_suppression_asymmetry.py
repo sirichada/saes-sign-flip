@@ -193,7 +193,7 @@ def main():
                   f"- suppress(-10) vs suppress(-20): Spearman rho = {rho_10_20:.4f}\n"
                   f"- suppress(-2) vs suppress(-20): Spearman rho = {rho_2_20:.4f}\n")
 
-    with open(f"{CACHE_DIR}/signed_reanalysis.md", "w") as f:
+    with open(f"{CACHE_DIR}/signed_reanalysis.md", "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"\nWrote {CACHE_DIR}/signed_reanalysis.md")
 
