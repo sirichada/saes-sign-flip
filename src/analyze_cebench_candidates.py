@@ -178,7 +178,7 @@ def main():
             "sensitivity_stats": ["mean over pairs (z-score)", "max over pairs (min-max, paper normalization)"],
             "independence_baseline": "leave-one-subject-out mean of per-subject I1 averages (code intent; published code loop is buggy)"}
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
-    with open(OUT_JSON, "w") as f:
+    with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump({"meta": meta, "results": results}, f, indent=1)
     print(f"wrote {REPORT} and {OUT_JSON}")
 
@@ -257,7 +257,7 @@ def write_report(results, prog, n_pairs):
               "distributed differently).", ""]
 
     os.makedirs(os.path.dirname(REPORT), exist_ok=True)
-    with open(REPORT, "w") as f:
+    with open(REPORT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
 
