@@ -320,7 +320,7 @@ def main():
               "computed without loading it.)", ""]
 
     os.makedirs(os.path.dirname(REPORT), exist_ok=True)
-    with open(REPORT, "w") as f:
+    with open(REPORT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
     # ---- raw metrics JSON ({meta, ...} cache style; drop text to keep it small) ----
@@ -331,7 +331,7 @@ def main():
     out_records = [{k: (None if isinstance(v, float) and np.isnan(v) else v)
                     for k, v in r.items() if k != "continuation"} for r in records]
     os.makedirs(os.path.dirname(OUT_JSON), exist_ok=True)
-    with open(OUT_JSON, "w") as f:
+    with open(OUT_JSON, "w", encoding="utf-8") as f:
         json.dump({"meta": meta, "metrics": out_records, "tests": tests}, f, indent=1, default=float)
 
     print(f"wrote {REPORT} and {OUT_JSON} ({len(records)} generations scored)")
