@@ -12,7 +12,7 @@
 (the 50 hard-coded in `src/steer.py`) stripped; metrics on continuations only.
 Tokenizer: deterministic regex (`\w+|[^\w\s]` — punctuation/markup symbols
 are single tokens, so tag spam registers as repetition).
-Reference LM for perplexity: not run (use --perplexity on the GPU box).
+Reference LM for perplexity: gpt2-large.
 
 **Caveat (per docs/methodology.md Track C):** this removes the *subjectivity*
 of Step 4's manual read, not the *same-forward-pass dependency* — the text was
@@ -68,6 +68,15 @@ the reference LM (prompt as context, excluded from loss). Cells: median [IQR], n
 | `7_12166` | 0.000 [0.000, 0.034] | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.009] |
 | `7_6944` | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.062] | 0.000 [0.000, 0.030] |
 | `14_6669` | 0.000 [0.000, 0.000] | 0.000 [0.000, 0.000] | 0.350 [0.271, 0.414] | 0.113 [0.048, 0.165] |
+
+## ppl per feature x condition
+
+| feature | s=+10 | s=-2 | s=-10 | s=-20 |
+|---|---|---|---|---|
+| `2_13823` | 257.356 [166.993, 401.275] | 41.411 [19.971, 81.049] | 1785.859 [756.944, 4266.132] | 4080.119 [1654.275, 8226.857] |
+| `7_12166` | 801.148 [245.200, 1551.181] | 13.224 [10.218, 20.885] | 92.064 [31.054, 261.569] | 293.067 [34.414, 1392.394] |
+| `7_6944` | 201.494 [141.844, 278.374] | 41.332 [19.677, 86.330] | 223.813 [77.565, 891.120] | 1180.665 [501.731, 1969.088] |
+| `14_6669` | 935.569 [480.261, 1418.563] | 12.679 [8.273, 16.745] | 11.665 [7.182, 20.667] | 79.685 [39.266, 310.922] |
 
 ## n_tokens per feature x condition
 
@@ -177,18 +186,35 @@ non-significant p there as absence-of-evidence, not equivalence, unless
 | `14_6669` | -2 vs -20 | |s| effect | +0.94 | 3.28e-18 | 1.20e-17 |
 | `14_6669` | +10 vs -10 | sign symmetry | +0.96 | 4.67e-19 | 4.54e-18 |
 
+### ppl
+
+| feature | contrast | claim | rb | p | p_fdr |
+|---|---|---|---|---|---|
+| `2_13823` | -2 vs -10 | |s| effect | +0.96 | 1.35e-16 | 8.10e-16 |
+| `2_13823` | -2 vs -20 | |s| effect | +0.95 | 2.27e-16 | 9.06e-16 |
+| `2_13823` | +10 vs -10 | sign symmetry | +0.81 | 3.59e-12 | 8.62e-12 |
+| `7_12166` | -2 vs -10 | |s| effect | +0.71 | 9.06e-10 | 1.36e-09 |
+| `7_12166` | -2 vs -20 | |s| effect | +0.78 | 2.33e-11 | 4.66e-11 |
+| `7_12166` | +10 vs -10 | sign symmetry | -0.68 | 5.82e-09 | 7.76e-09 |
+| `7_6944` | -2 vs -10 | |s| effect | +0.62 | 1.09e-07 | 1.30e-07 |
+| `7_6944` | -2 vs -20 | |s| effect | +0.91 | 5.84e-15 | 1.75e-14 |
+| `7_6944` | +10 vs -10 | sign symmetry | +0.07 | 5.60e-01 | 6.11e-01 |
+| `14_6669` | -2 vs -10 | |s| effect | -0.05 | 6.84e-01 | 6.84e-01 |
+| `14_6669` | -2 vs -20 | |s| effect | +0.76 | 7.45e-11 | 1.28e-10 |
+| `14_6669` | +10 vs -10 | sign symmetry | -0.96 | 1.07e-16 | 8.10e-16 |
+
 ## Spotlight: `14_6669` monotonicity
 
 Step 1 flagged `14_6669` as the single monotonic-reversal candidate (output
 score rising across −2/−10/−20); Step 4's manual read attributed that rise to
 degenerate generation. Blind check: does degeneracy also rise monotonically?
 
-| s | rep_1 | rep_2 | rep_3 | max_run | nonling | output score |
-|---|---|---|---|---|---|---|
-| +10 | 0.000 | 0.000 | 0.000 | 0.317 | 0.000 | 0.0727 |
-| -2 | 0.056 | 0.000 | 0.000 | 0.065 | 0.000 | 0.1832 |
-| -10 | 0.807 | 0.703 | 0.636 | 0.122 | 0.350 | 0.2343 |
-| -20 | 0.556 | 0.326 | 0.175 | 0.103 | 0.113 | 0.3867 |
+| s | rep_1 | rep_2 | rep_3 | max_run | nonling | ppl | output score |
+|---|---|---|---|---|---|---|---|
+| +10 | 0.000 | 0.000 | 0.000 | 0.317 | 0.000 | 935.569 | 0.0727 |
+| -2 | 0.056 | 0.000 | 0.000 | 0.065 | 0.000 | 12.679 | 0.1832 |
+| -10 | 0.807 | 0.703 | 0.636 | 0.122 | 0.350 | 11.665 | 0.2343 |
+| -20 | 0.556 | 0.326 | 0.175 | 0.103 | 0.113 | 79.685 | 0.3867 |
 
 (medians only; output score shown for context — the metrics above were
 computed without loading it.)
