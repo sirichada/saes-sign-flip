@@ -1,0 +1,274 @@
+{
+ "meta": {
+  "script": "src/analyze_cebench_candidates.py",
+  "date": "2026-07-17",
+  "n_pairs": 5000,
+  "extraction_meta": {
+   "dataset": "GulkoA/contrastive-stories-v4",
+   "model": "google/gemma-2-2b",
+   "dtype": "float32",
+   "sae_release": "gemma-scope-2b-pt-res-canonical",
+   "sae_ids": {
+    "2": "layer_2/width_16k/canonical",
+    "7": "layer_7/width_16k/canonical",
+    "14": "layer_14/width_16k/canonical"
+   },
+   "token_average": "all tokens (per CE_Bench_v2.py FIXME'd marked-token filter)",
+   "date_started": "2026-07-17",
+   "date_finished": "2026-07-17"
+  },
+  "pinned_stat": "max over pairs of per-pair z-scored value (code normalization)",
+  "sensitivity_stats": [
+   "mean over pairs (z-score)",
+   "max over pairs (min-max, paper normalization)"
+  ],
+  "independence_baseline": "leave-one-subject-out mean of per-subject I1 averages (code intent; published code loop is buggy)"
+ },
+ "results": {
+  "2": {
+   "sae_scalars": {
+    "contrastive": 32.74968476185993,
+    "independence": 39.94274109251556,
+    "interpretability": 34.900999684920684
+   },
+   "candidates": {
+    "2_13823": {
+     "contrastive": {
+      "max": {
+       "value": 71.91194862089763,
+       "percentile": 99.9755859375
+      },
+      "mean": {
+       "value": 4.813987100770667,
+       "percentile": 99.786376953125
+      },
+      "minmax_max": {
+       "value": 1.0,
+       "percentile": 97.991943359375
+      }
+     },
+     "independence": {
+      "max": {
+       "value": 41.631068220477566,
+       "percentile": 99.57275390625
+      },
+      "mean": {
+       "value": 7.131666794317343,
+       "percentile": 99.896240234375
+      },
+      "minmax_max": {
+       "value": 1.0,
+       "percentile": 98.30322265625
+      }
+     },
+     "interpretability": {
+      "max": {
+       "value": 58.832395334793404,
+       "percentile": 99.96337890625
+      },
+      "mean": {
+       "value": 6.3873441973646266,
+       "percentile": 99.86572265625
+      },
+      "minmax_max": {
+       "value": 1.0,
+       "percentile": 98.333740234375
+      }
+     }
+    }
+   },
+   "top_neuron": {
+    "contrastive": {
+     "index": 15089,
+     "max": 99.59427061851986
+    },
+    "independence": {
+     "index": 15089,
+     "max": 94.76704791341209
+    },
+    "interpretability": {
+     "index": 15089,
+     "max": 99.64148375770775
+    }
+   }
+  },
+  "7": {
+   "sae_scalars": {
+    "contrastive": 41.18001653821655,
+    "independence": 51.978501272763125,
+    "interpretability": 44.49208430027375
+   },
+   "candidates": {
+    "7_12166": {
+     "contrastive": {
+      "max": {
+       "value": -0.06967674988957377,
+       "percentile": 5.1513671875
+      },
+      "mean": {
+       "value": -0.28320836436606034,
+       "percentile": 4.78515625
+      },
+      "minmax_max": {
+       "value": 0.006808869099765957,
+       "percentile": 6.134033203125
+      }
+     },
+     "independence": {
+      "max": {
+       "value": -0.12463156209574452,
+       "percentile": 4.4677734375
+      },
+      "mean": {
+       "value": -0.3085361273415658,
+       "percentile": 4.547119140625
+      },
+      "minmax_max": {
+       "value": 0.00225824318981237,
+       "percentile": 4.26025390625
+      }
+     },
+     "interpretability": {
+      "max": {
+       "value": -0.15433240101323079,
+       "percentile": 4.39453125
+      },
+      "mean": {
+       "value": -0.3244176791222091,
+       "percentile": 4.620361328125
+      },
+      "minmax_max": {
+       "value": 0.0037083385716864987,
+       "percentile": 4.06494140625
+      }
+     }
+    },
+    "7_6944": {
+     "contrastive": {
+      "max": {
+       "value": 23.004378907376108,
+       "percentile": 92.6513671875
+      },
+      "mean": {
+       "value": -0.22543718750337452,
+       "percentile": 29.449462890625
+      },
+      "minmax_max": {
+       "value": 0.44116239887102776,
+       "percentile": 84.36279296875
+      }
+     },
+     "independence": {
+      "max": {
+       "value": 16.149066528689904,
+       "percentile": 88.214111328125
+      },
+      "mean": {
+       "value": -0.17772136754326928,
+       "percentile": 40.582275390625
+      },
+      "minmax_max": {
+       "value": 0.4248561151244654,
+       "percentile": 89.190673828125
+      }
+     },
+     "interpretability": {
+      "max": {
+       "value": 21.52712862900064,
+       "percentile": 91.741943359375
+      },
+      "mean": {
+       "value": -0.22261438642643708,
+       "percentile": 35.16845703125
+      },
+      "minmax_max": {
+       "value": 0.43541518651879374,
+       "percentile": 86.9140625
+      }
+     }
+    }
+   },
+   "top_neuron": {
+    "contrastive": {
+     "index": 4879,
+     "max": 105.51213772912644
+    },
+    "independence": {
+     "index": 2182,
+     "max": 108.29844832231082
+    },
+    "interpretability": {
+     "index": 2182,
+     "max": 101.68589255078025
+    }
+   }
+  },
+  "14": {
+   "sae_scalars": {
+    "contrastive": 46.53520104760039,
+    "independence": 47.79568393308375,
+    "interpretability": 44.09830844740177
+   },
+   "candidates": {
+    "14_6669": {
+     "contrastive": {
+      "max": {
+       "value": 0.052685429206956874,
+       "percentile": 8.70361328125
+      },
+      "mean": {
+       "value": -0.26245101303691404,
+       "percentile": 4.52880859375
+      },
+      "minmax_max": {
+       "value": 0.007652273015415234,
+       "percentile": 7.14111328125
+      }
+     },
+     "independence": {
+      "max": {
+       "value": -0.06819835023873776,
+       "percentile": 8.721923828125
+      },
+      "mean": {
+       "value": -0.29288816727880274,
+       "percentile": 4.498291015625
+      },
+      "minmax_max": {
+       "value": 0.005437314839514383,
+       "percentile": 8.770751953125
+      }
+     },
+     "interpretability": {
+      "max": {
+       "value": 0.005318038109062448,
+       "percentile": 9.48486328125
+      },
+      "mean": {
+       "value": -0.3032472889546275,
+       "percentile": 4.52880859375
+      },
+      "minmax_max": {
+       "value": 0.009705061629598319,
+       "percentile": 11.090087890625
+      }
+     }
+    }
+   },
+   "top_neuron": {
+    "contrastive": {
+     "index": 12858,
+     "max": 98.94798769363422
+    },
+    "independence": {
+     "index": 71,
+     "max": 91.54626154387117
+    },
+    "interpretability": {
+     "index": 15887,
+     "max": 85.35678746715331
+    }
+   }
+  }
+ }
+}
