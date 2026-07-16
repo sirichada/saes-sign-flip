@@ -1,12 +1,14 @@
+*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*
+
 # Signed Re-Analysis: Per-Layer Reversals & Rank Stability
 
-Extends `amplify_vs_suppress_comparison.md` per CLAUDE.md Step 1. Uses only cached JSON scores, no GPU.
+Extends `amplify_vs_suppress_comparison.md` with a signed re-analysis. Uses only cached JSON scores, no GPU.
 
 **Caveat:** the raw `output_score` is non-negative by construction (`rank_output_score * top_token_score`, both in [0,1]) — confirmed empirically, min=0 in every cache. So 'reversal' below means the *paired delta* (amplify score − suppress score) goes negative, i.e. suppression scores higher than amplification for that feature — not that the raw score itself goes negative. A true below-*unsteered*-baseline test would need an amp_factor=0 cache, which does not exist yet.
 
 ## Pooled vs. per-layer correlation (Simpson's-paradox check)
 
-Pooled across all layers: Spearman rho = -0.2717 (p=3.90e-18), Pearson r = 0.1064 (p=5.40e-08). The existing comparison report only cites the Pearson value (weak positive) as evidence output_score isn't dominated by a shared confound; the pooled Spearman is actually *negative*, which is if anything stronger support for that claim per CLAUDE.md's preference for rank correlation near a floor. But per-layer Spearman below is mostly **positive** (often 0.5-0.8) in early/mid layers — the pooled negative correlation is a between-layer artifact (early layers have low amplify + variable suppress; late layers have high amplify + suppress collapsed near-uniformly to ~0), not evidence within any single layer. Read the per-layer numbers, not the pooled one.
+Pooled across all layers: Spearman rho = -0.2717 (p=3.90e-18), Pearson r = 0.1064 (p=5.40e-08). The existing comparison report only cites the Pearson value (weak positive) as evidence output_score isn't dominated by a shared confound; the pooled Spearman is actually *negative*, which is if anything stronger support for that claim given the general preference for rank correlation near a floor. But per-layer Spearman below is mostly **positive** (often 0.5-0.8) in early/mid layers — the pooled negative correlation is a between-layer artifact (early layers have low amplify + variable suppress; late layers have high amplify + suppress collapsed near-uniformly to ~0), not evidence within any single layer. Read the per-layer numbers, not the pooled one.
 
 ## Per-layer reversal fraction and rank correlation (amp_factor=-10)
 
@@ -59,7 +61,7 @@ Features reversing at all three magnitudes: **16** (12.0% of the 133 that revers
 | 7_12166 | 0.0001 | 0.0004 | 0.0025 | 0.0218 |
 | 7_6944 | 0.0002 | 0.1582 | 0.0902 | 0.0106 |
 
-Only `14_6669` (layer 14) shows a clean, monotonically-increasing-with-magnitude reversal (0.073 → 0.183 → 0.234 → 0.387 as amp_factor goes 10 → -2 → -10 → -20) — the single strongest candidate for a genuine bidirectional/suppression-sensitive feature in this dataset, and worth a qualitative generation spot-check per CLAUDE.md Step 4. The other three non-trivial candidates are small and non-monotonic across magnitude, consistent with noise rather than a real effect.
+Only `14_6669` (layer 14) shows a clean, monotonically-increasing-with-magnitude reversal (0.073 → 0.183 → 0.234 → 0.387 as amp_factor goes 10 → -2 → -10 → -20) — the single strongest candidate for a genuine bidirectional/suppression-sensitive feature in this dataset, and worth a qualitative generation spot-check (see `step4_coherence_spotcheck.md`). The other three non-trivial candidates are small and non-monotonic across magnitude, consistent with noise rather than a real effect.
 
 ## Rank stability of suppression scores across magnitude
 

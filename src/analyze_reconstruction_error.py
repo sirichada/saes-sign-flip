@@ -21,6 +21,7 @@ import numpy as np
 from scipy.stats import wilcoxon
 
 CACHE_DIR = "data/output_scores"
+REPORT_DIR = "reports"
 CANDIDATES = {"2_13823", "7_12166", "7_6944", "14_6669"}
 
 # (label, cache basename). Missing files are skipped with a warning.
@@ -74,8 +75,9 @@ def main():
     sup_label = "suppress(-10)" if "suppress(-10)" in present else None
 
     lines = []
-    lines.append("# Step 3 — Reconstruction Error & Off-Manifold Distance\n")
-    lines.append("CLAUDE.md Step 3. Uses only the `diagnostics` blocks cached by `output_score.py "
+    lines.append("*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*\n")
+    lines.append("# Reconstruction Error & Off-Manifold Distance\n")
+    lines.append("Uses only the `diagnostics` blocks cached by `output_score.py "
                  "--log_recon_error`, no GPU.\n")
     lines.append("**Method:** for each feature, at the last token, we log the L2 norms "
                  "`clean_recon_err` = ‖a_i − dec(enc(a_i))‖ (amp-independent SAE fidelity), "
@@ -163,9 +165,9 @@ def main():
         print("\n=== Spot-check candidates: off-manifold error vs layer population ===")
         lines.append("\n## Spot-check candidates vs their layer population\n")
         lines.append("Is each candidate's off-manifold error an outlier within its layer, or "
-                     "ordinary? This quantitatively firms up Step 4's manual coherence call on "
-                     "`14_6669` (whose output score rose monotonically with |s| as generation "
-                     "degraded).\n")
+                     "ordinary? This quantitatively firms up `step4_coherence_spotcheck.md`'s manual "
+                     "coherence call on `14_6669` (whose output score rose monotonically with |s| as "
+                     "generation degraded).\n")
         ref = sup_label or (sweep[-1] if sweep else None)
         if ref:
             lines.append(f"Reference condition: **{ref}**. Percentile = fraction of that layer's "
@@ -190,7 +192,7 @@ def main():
                  "or exceeds it (sign-specific), whether the zero-ablation anchor already shows the "
                  "effect, and whether the decision gate for the 'true suppression' extension opens._\n")
 
-    out = f"{CACHE_DIR}/step3_reconstruction_error.md"
+    out = f"{REPORT_DIR}/step3_reconstruction_error.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"\nWrote {out}")

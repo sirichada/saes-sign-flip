@@ -23,6 +23,7 @@ from scipy.stats import mannwhitneyu
 
 CACHE_DIR = "data/output_scores"
 FEATURE_DIR = "data/features"
+REPORT_DIR = "reports"
 CANDIDATES = {"2_13823", "7_12166", "7_6944", "14_6669"}
 
 # sign -> (selected diag cache basename, salmon-pool diag cache basename)
@@ -134,12 +135,13 @@ def main():
     norms = load_json(f"{FEATURE_DIR}/decoder_norms.json")
     row_norms = norms["row_norms"] if norms else {}
 
-    lines = ["# Step 2 — Dead-Salmon Random-Direction Control\n"]
-    lines.append("CLAUDE.md Step 2. Tests DIRECTION-specificity of the suppression off-manifold "
-                 "effect (complement to Step 3's sign-specificity): do the paper's SELECTED "
-                 "max-activating features fall further off-manifold than a random per-layer POOL "
-                 "of SAE dictionary latents steered identically, or is the collapse generic (a "
-                 "dead salmon)?\n")
+    lines = ["*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*\n",
+              "# Dead-Salmon Random-Direction Control\n"]
+    lines.append("Tests DIRECTION-specificity of the suppression off-manifold "
+                 "effect (complement to `step3_reconstruction_error.md`'s sign-specificity): do the "
+                 "paper's SELECTED max-activating features fall further off-manifold than a random "
+                 "per-layer POOL of SAE dictionary latents steered identically, or is the collapse "
+                 "generic (a dead salmon)?\n")
     lines.append(f"Control = a shared pool of n_pool={meta['n_pool']} random dictionary latents "
                  f"per layer (seed {meta['seed']}). The bump is feature-agnostic, so controls are "
                  "not matched to individual selected features; the test is therefore an UNPAIRED "
@@ -222,11 +224,12 @@ def main():
     lines.append("\n## Summary interpretation\n_Fill in: per sign, in how many layers do selected "
                  "features fall significantly further off-manifold than the random control pool "
                  "(direction-specific) vs. indistinguishable (dead salmon)? Does any survival "
-                 "concentrate in layers ~17-23 (Step 3's band)? Do the 4 candidates sit inside "
-                 "their layer's control distribution (pctile near 50%) — failing the specificity "
-                 "test — consistent with the Step 3/Step 4 artifact reading?_\n")
+                 "concentrate in the layer band flagged in `step3_reconstruction_error.md`? Do the "
+                 "4 candidates sit inside their layer's control distribution (pctile near 50%) — "
+                 "failing the specificity test — consistent with the artifact reading in "
+                 "`step3_reconstruction_error.md` / `step4_coherence_spotcheck.md`?_\n")
 
-    out = f"{CACHE_DIR}/step2_dead_salmon.md"
+    out = f"{REPORT_DIR}/step2_dead_salmon.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"Wrote {out}")

@@ -1,3 +1,5 @@
+*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*
+
 # Amplification vs. Suppression output_score Comparison
 
 - amplify cache: `C:\Users\sirichada\Github\saes-for-steering\data\output_scores\gemma2_2b_amplify.json` (2600 entries)

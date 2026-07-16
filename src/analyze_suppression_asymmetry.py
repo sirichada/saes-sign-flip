@@ -17,6 +17,7 @@ import numpy as np
 from scipy.stats import spearmanr, pearsonr, wilcoxon
 
 CACHE_DIR = "data/output_scores"
+REPORT_DIR = "reports"
 
 
 def load_scores(name):
@@ -131,8 +132,9 @@ def main():
 
     # ---- Write markdown report ----
     lines = []
+    lines.append("*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*\n")
     lines.append("# Signed Re-Analysis: Per-Layer Reversals & Rank Stability\n")
-    lines.append("Extends `amplify_vs_suppress_comparison.md` per CLAUDE.md Step 1. "
+    lines.append("Extends `amplify_vs_suppress_comparison.md` with a signed re-analysis. "
                   "Uses only cached JSON scores, no GPU.\n")
     lines.append("**Caveat:** the raw `output_score` is non-negative by construction "
                   "(`rank_output_score * top_token_score`, both in [0,1]) — confirmed empirically, "
@@ -147,7 +149,7 @@ def main():
                   f"Pearson r = {r:.4f} (p={pp:.2e}). The existing comparison report only cites the "
                   f"Pearson value (weak positive) as evidence output_score isn't dominated by a shared "
                   f"confound; the pooled Spearman is actually *negative*, which is if anything stronger "
-                  f"support for that claim per CLAUDE.md's preference for rank correlation near a floor. "
+                  f"support for that claim given the general preference for rank correlation near a floor. "
                   f"But per-layer Spearman below is mostly **positive** (often 0.5-0.8) in early/mid "
                   f"layers — the pooled negative correlation is a between-layer artifact (early layers "
                   f"have low amplify + variable suppress; late layers have high amplify + suppress "
@@ -184,18 +186,19 @@ def main():
     lines.append("\nOnly `14_6669` (layer 14) shows a clean, monotonically-increasing-with-magnitude "
                   "reversal (0.073 → 0.183 → 0.234 → 0.387 as amp_factor goes 10 → -2 → -10 → -20) — "
                   "the single strongest candidate for a genuine bidirectional/suppression-sensitive "
-                  "feature in this dataset, and worth a qualitative generation spot-check per CLAUDE.md "
-                  "Step 4. The other three non-trivial candidates are small and non-monotonic across "
-                  "magnitude, consistent with noise rather than a real effect.\n")
+                  "feature in this dataset, and worth a qualitative generation spot-check "
+                  "(see `step4_coherence_spotcheck.md`). The other three non-trivial candidates are "
+                  "small and non-monotonic across magnitude, consistent with noise rather than a real "
+                  "effect.\n")
 
     lines.append("## Rank stability of suppression scores across magnitude\n")
     lines.append(f"- suppress(-2) vs suppress(-10): Spearman rho = {rho_2_10:.4f}\n"
                   f"- suppress(-10) vs suppress(-20): Spearman rho = {rho_10_20:.4f}\n"
                   f"- suppress(-2) vs suppress(-20): Spearman rho = {rho_2_20:.4f}\n")
 
-    with open(f"{CACHE_DIR}/signed_reanalysis.md", "w", encoding="utf-8") as f:
+    with open(f"{REPORT_DIR}/signed_reanalysis.md", "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"\nWrote {CACHE_DIR}/signed_reanalysis.md")
+    print(f"\nWrote {REPORT_DIR}/signed_reanalysis.md")
 
 
 if __name__ == "__main__":

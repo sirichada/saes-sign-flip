@@ -1,6 +1,8 @@
-# Step 4 Coherence Spot-Check: Candidate Reversal Features
+*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*
 
-Completes the outstanding half of CLAUDE.md Step 4 (Methodology section) for the 4 features
+# Coherence Spot-Check: Candidate Reversal Features
+
+Completes the qualitative coherence check for the 4 features
 flagged by `signed_reanalysis.md` as non-trivial suppression "reversals":
 `data/features/spot_check_reversal_candidates.json` = `2_13823`, `7_12166`, `7_6944`, `14_6669`.
 
@@ -8,7 +10,7 @@ flagged by `signed_reanalysis.md` as non-trivial suppression "reversals":
 `data/generated_texts/gemma_2b/gemma2_2b_generations_cache_{10,neg2,neg10,neg20}_0.json`
 (6 of the cached prompts per feature/magnitude shown below; all generations for a feature/magnitude
 pair were read, not just the excerpts quoted). No LLM judge or perplexity metric was used — this is
-the qualitative "does this read as English" pass CLAUDE.md Step 4 calls for, not a quantitative one.
+the qualitative "does this read as English" pass, not a quantitative one.
 The `axbench_llm_scores/` caches in this repo are a *different*, pre-existing artifact from the
 original paper's own AxBench cross-validation (Gemma-2-9B-it) and are not part of this check.
 
@@ -51,8 +53,8 @@ Coherence collapse is **not sign-specific**. Amplification at s=+10 is already d
 with at that magnitude. Suppression at s=-2 is fluent for all 4. Suppression at s=-10 and s=-20
 both collapse into non-language output (repeated tokens, HTML/markup spam, foreign-script/unicode
 noise) for all 4 features. The pattern across the sweep is: **fluent at small |s|, degenerate at
-large |s|, in both directions** — a magnitude effect, consistent with the off-distribution
-guardrail in CLAUDE.md, not evidence of a suppression-specific mechanism.
+large |s|, in both directions** — a magnitude effect, consistent with the project's off-distribution
+guardrail, not evidence of a suppression-specific mechanism.
 
 ## Implication for the `14_6669` "monotonic reversal" claim
 
@@ -60,7 +62,7 @@ guardrail in CLAUDE.md, not evidence of a suppression-specific mechanism.
 its output_score rises monotonically with suppression magnitude (0.073 → 0.183 → 0.234 → 0.387 as
 s goes 10 → -2 → -10 → -20). The generations show that rise coincides exactly with the text
 degrading into repeated-token/markup spam at s=-10 and s=-20 — the same failure mode seen in the
-other 3 (non-monotonic, noise-floor) candidates. This is the circularity Step 4 exists to catch:
+other 3 (non-monotonic, noise-floor) candidates. This is the circularity this check exists to catch:
 a high output_score at extreme magnitude is consistent with the metric rewarding repetitive/
 degenerate generation, not with genuine bidirectional semantic control. **Recommend downgrading
 `14_6669` from "strongest reversal candidate" to "consistent with a degenerate-generation

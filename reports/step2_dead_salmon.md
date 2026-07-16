@@ -1,6 +1,8 @@
-# Step 2 — Dead-Salmon Random-Direction Control
+*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*
 
-CLAUDE.md Step 2. Tests DIRECTION-specificity of the suppression off-manifold effect (complement to Step 3's sign-specificity): do the paper's SELECTED max-activating features fall further off-manifold than a random per-layer POOL of SAE dictionary latents steered identically, or is the collapse generic (a dead salmon)?
+# Dead-Salmon Random-Direction Control
+
+Tests DIRECTION-specificity of the suppression off-manifold effect (complement to `step3_reconstruction_error.md`'s sign-specificity): do the paper's SELECTED max-activating features fall further off-manifold than a random per-layer POOL of SAE dictionary latents steered identically, or is the collapse generic (a dead salmon)?
 
 Control = a shared pool of n_pool=100 random dictionary latents per layer (seed 20260714). The bump is feature-agnostic, so controls are not matched to individual selected features; the test is therefore an UNPAIRED per-layer Mann-Whitney U (selected population vs. control pool), p_fdr = Benjamini-Hochberg across the 26 layers. Primary metric `offmanifold_err`; output score reported secondarily.
 
@@ -209,9 +211,9 @@ The only residual magnitude confound is ‖W_dec[feature]‖ (the bump is otherw
 **Dead salmon confirmed at both signs.** 0/26 layers pass FDR<0.05 for `offmanifold_err` at
 s=-10 and 0/26 at s=+10 (same for the secondary output-score metric at both signs). Selected
 features fall further off-manifold than their layer's random control pool in only 13/26 layers
-at each sign — a coin-flip, not a directional pattern. No layer, including Step 3's 17-23 band,
-comes close to surviving correction (all `p_fdr` in that band sit at ~0.9-0.95, indistinguishable
-from the rest of the range).
+at each sign — a coin-flip, not a directional pattern. No layer, including the 17-23 band flagged
+in `step3_reconstruction_error.md`, comes close to surviving correction (all `p_fdr` in that band
+sit at ~0.9-0.95, indistinguishable from the rest of the range).
 
 The decoder-norm covariate rules out the one residual confound outright rather than just
 controlling for it: ‖W_dec‖ = 1.0000 for both selected and control features in every layer
@@ -227,7 +229,8 @@ specificity signal in either direction.
 
 **Conclusion:** the off-manifold collapse under steering is generic to the SAE dictionary, not
 targeted at the paper's selected max-activating features. This closes the direction-specificity
-loophole Step 3 could not address, and — combined with Step 3's own layer-localized/reversed
-partial signal and Step 4's coherence-tracks-|s| finding — leaves the artifact reading as the
+loophole `step3_reconstruction_error.md` could not address, and — combined with that report's own
+layer-localized/reversed partial signal and `step4_coherence_spotcheck.md`'s coherence-tracks-|s|
+finding — leaves the artifact reading as the
 best-supported account of the apparent suppression asymmetry. Per the conditional-sweep rule, no
 gap appeared at s=±10, so the -2/-20 salmon sweep is not run.
