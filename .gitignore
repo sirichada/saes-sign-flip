@@ -10,3 +10,4 @@ docs/
 **/.DS_Store
 figures/
 src/make_figures.py
+src/plot_candidate_reversal.py
