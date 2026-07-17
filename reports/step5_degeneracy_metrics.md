@@ -4,7 +4,15 @@
 
 ## Summary
 
-*(placeholder — write after reading the tables below)*
+**Step 4's manual anchors hold up blind.** `14_6669` is heavily repetitive and markup-noisy at −10 (rep_1 0.807, nonling 0.35) and fluent at −2 (rep_1 0.056, nonling 0.000); `7_6944`'s +10 generations are its row's repetition maximum (rep_1 0.600). The qualitative read that seeded the artifact hypothesis was not an artifact of the reader.
+
+**But `14_6669` breaks the "tracks |s|, not sign" generalization it was used to support.** Its sign-symmetry contrast (+10 vs −10) is the largest effect in the entire grid — rb up to 0.98, p as low as 1e-19 across rep_1/rep_2/rep_3/nonling/ppl — meaning degeneracy at −10 is *not* interchangeable with degeneracy at +10 for this feature: +10 stays clean (rep_1 0.000, low nonling) while −10 is severely degraded. Every other candidate's sign-symmetry effects are smaller and mixed in direction. Step 4's claim generalizes across the 4-candidate set on average, but the one feature it was specifically invoked to explain is the one exception to it.
+
+**`14_6669`'s degeneracy is also non-monotone in |s|, while its output score is not.** rep_1 rises −2→−10 (0.056→0.807) then *falls* at −20 (0.556); ppl falls −10→−20 relative to −2→−10's rise pattern is likewise non-monotone (12.7→11.7→79.7). The output score climbs monotonically across all three magnitudes (0.073→0.183→0.234→0.387, spotlight table). A pure "rising score = rising degeneracy" story doesn't fit this shape — degeneracy and score are coupled (both move sharply together at −10) but not with the same functional form, so "the score is just measuring how broken the text is" is too simple as stated.
+
+**`2_13823` at −10/−20 is degeneracy-by-brevity, not degeneracy-by-repetition.** Its near-zero rep_n at those magnitudes coincides with continuations collapsing to ~3 tokens (n_tokens table) while ppl still explodes (1786 at −10, 4080 at −20) — the low repetition score reflects too little text to repeat, not fluency. Any reading of the rep_n tables for this feature must go through the n_tokens table first.
+
+**Net effect on Track A's artifact reading:** confirmed and refined, not undermined. The blind metrics corroborate that generation quality degrades sharply under extreme steering for these candidates (ruling out "the manual read was biased"), but for `14_6669` specifically the relationship between score and degeneracy is more structured — sign-asymmetric and non-monotone — than "coherence tracks |s|" implies. This is consistent with `14_6669`'s reversal being a real artifact of *something* about extreme suppression rather than pure noise, but that something is not simply "more magnitude = more garbage" — it motivates Step 6's independent, steering-free check on whether the feature is tracking anything meaningful at all.
 
 **Method.** Blind, deterministic metrics over the cached generations
 (`data/generated_texts/gemma_2b/gemma2_2b_generations_cache_{10,neg2,neg10,neg20}_0.json`;

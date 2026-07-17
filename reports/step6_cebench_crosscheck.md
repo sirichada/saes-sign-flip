@@ -4,7 +4,15 @@
 
 ## Summary
 
-*(placeholder — write after reading the tables below)*
+**Result splits cleanly along the candidate set, not uniformly.** `2_13823` (layer 2) and `7_6944` (layer 7) sit in the extreme upper tail of their own dictionary's interpretability distribution — 100.0 and 91.7 percentile respectively, robust across the pinned max-pooling and both sensitivity variants (mean-over-pairs, min-max normalization). `7_12166` (layer 7) and `14_6669` (layer 14) sit near the bottom — 4.4 and 9.5 percentile, again consistent across all three scoring variants. This is not a borderline result for any of the four: each candidate lands unambiguously in one tail or the other.
+
+**`14_6669` is the load-bearing result here.** It is the single feature Step 1 flagged as a monotonic reversal and Step 4/Step 5 have been probing ever since. A bottom-decile interpretability percentile, measured with steering switched off entirely, is independent, non-circular evidence that this feature is not reliably discriminating the contrastive story pairs any better than an arbitrary latent in its own dictionary — i.e., there is little reason to think it tracks a coherent semantic concept outside the steering context that produced its disputed score. Per the pinned outcome asymmetry, a low percentile is corroboration for "noise, not signal," and this is that case.
+
+**`7_6944`'s high percentile complicates a clean story, but does not resolve it.** `7_6944` also showed a large sign-asymmetric degeneracy effect in Step 5 (+10 clean, −10 noticeably worse), yet CE-Bench says it *is* a genuinely interpretable feature. Per the construct guardrail, a high percentile does not rule out the output score still being an artifact for this feature under extreme suppression — it only rules out "the feature is meaningless." So `7_6944` is the sharpest illustration in this project of the output score's blind spot: an interpretable feature whose extreme-magnitude steering score can still degrade into an artifact.
+
+**Caveat that applies to all four numbers:** these percentiles are internally calibrated (each candidate vs. the other latents of its own SAE, same data, same math) with no per-feature ground truth — CE-Bench's own SAEBench validation exists only at the max-pooled SAE-scalar level. Treat the tail placement as suggestive, corroborating evidence, not a validated interpretability score in an absolute sense.
+
+**Net effect on the artifact reading and the decision gate:** strengthens, does not reopen. `14_6669` now has two independent marks against it — non-monotone, sign-asymmetric degeneracy (Step 5) and bottom-decile steering-free interpretability (Step 6) — making it the best-supported single case of an artifact-driven reversal in the project. This narrows a possible revisit to `14_6669` specifically rather than reopening the population-level decision gate, which per `docs/methodology.md` Step 6 does not consume or feed this result either way.
 
 ## What this is (and is not)
 
