@@ -19,7 +19,7 @@ import json
 from collections import defaultdict
 
 import numpy as np
-from scipy.stats import mannwhitneyu
+from scipy.stats import mannwhitneyu, norm
 
 CACHE_DIR = "data/output_scores"
 FEATURE_DIR = "data/features"
@@ -73,25 +73,43 @@ def by_layer(values):
     return out
 
 
+def mde_rank_biserial(n_per_group=100, alpha=0.05, power=0.8):
+    """Design-level minimum detectable rank-biserial effect for a two-sided WMW
+    test, via Noether's (1987) sample-size formula inverted for effect size:
+        p - 0.5 = (z_{alpha/2} + z_power) / sqrt(12 * N * c(1-c)),
+    with N = 2*n_per_group total, equal allocation c=0.5, and rb = 2*p - 1.
+    A property of the DESIGN (sample sizes + alpha + target power), computed
+    post-hoc — NOT observed/post-hoc power (which reads power off the realized
+    effect and is a known error). Returns the detectable |rb|."""
+    N = 2 * n_per_group
+    c = 0.5
+    z = norm.ppf(1 - alpha / 2) + norm.ppf(power)
+    p_shift = z / np.sqrt(12 * N * c * (1 - c))
+    return 2 * p_shift  # rb = 2*p - 1, with p = 0.5 + p_shift
+
+
 def unpaired_layer_test(sel_vals, ctrl_vals):
     """Per layer: Mann-Whitney U (two-sided) of the selected population vs the
     control pool. Returns (rows, pvals), rows = [layer, n_sel, n_ctrl, sel_mean,
-    ctrl_mean, sel-ctrl]."""
+    ctrl_mean, sel-ctrl, rb]. rb = rank-biserial effect (2U/(n_sel*n_ctrl)-1,
+    same formula as Step 5's mwu() helper); positive = selected > control."""
     sel_by, ctrl_by = by_layer(sel_vals), by_layer(ctrl_vals)
     rows, pvals = [], []
     for lyr in sorted(set(sel_by) | set(ctrl_by)):
         s = np.array(sel_by.get(lyr, []), float)
         c = np.array(ctrl_by.get(lyr, []), float)
+        rb = np.nan
         if len(s) and len(c):
             try:
-                _, p = mannwhitneyu(s, c, alternative="two-sided")
+                u, p = mannwhitneyu(s, c, alternative="two-sided")
+                rb = 2 * u / (len(s) * len(c)) - 1
             except ValueError:
                 p = np.nan
         else:
             p = np.nan
         sm = float(np.mean(s)) if len(s) else np.nan
         cm = float(np.mean(c)) if len(c) else np.nan
-        rows.append([lyr, len(s), len(c), sm, cm, sm - cm])
+        rows.append([lyr, len(s), len(c), sm, cm, sm - cm, rb])
         pvals.append(p)
     return rows, pvals
 
@@ -100,23 +118,34 @@ def emit_metric(lines, title, blurb, rows, pvals, baseline_by_layer=None):
     p_fdr = bh_fdr(pvals)
     lines.append(f"\n{title}\n")
     lines.append(blurb + "\n")
-    hdr = "| layer | n_sel | n_ctrl | sel | ctrl | sel-ctrl | mwu p | p_fdr |"
-    sep = "|---|---|---|---|---|---|---|---|"
+    hdr = "| layer | n_sel | n_ctrl | sel | ctrl | sel-ctrl | rb | mwu p | p_fdr |"
+    sep = "|---|---|---|---|---|---|---|---|---|"
     if baseline_by_layer is not None:
         hdr += " unsteered base |"
         sep += "---|"
     lines.append(hdr)
     lines.append(sep)
-    for (lyr, ns, nc, sm, cm, diff), p, pf in zip(rows, pvals, p_fdr):
+    for (lyr, ns, nc, sm, cm, diff, rb), p, pf in zip(rows, pvals, p_fdr):
         p_s = f"{p:.2e}" if p == p else "nan"
-        row = f"| {lyr} | {ns} | {nc} | {sm:.4f} | {cm:.4f} | {diff:+.4f} | {p_s} | {pf:.2e} |"
+        rb_s = f"{rb:+.3f}" if rb == rb else "nan"
+        row = f"| {lyr} | {ns} | {nc} | {sm:.4f} | {cm:.4f} | {diff:+.4f} | {rb_s} | {p_s} | {pf:.2e} |"
         if baseline_by_layer is not None:
             b = baseline_by_layer.get(lyr, np.nan)
             row += f" {b:.4f} |" if b == b else " n/a |"
         lines.append(row)
     n_sig = int(np.nansum(np.asarray(p_fdr) < 0.05))
     n_pos = sum(1 for r in rows if r[5] == r[5] and r[5] > 0)
-    lines.append(f"\n**{n_sig}/{len(rows)} layers FDR<0.05; sel>ctrl in {n_pos}/{len(rows)} layers.**\n")
+    abs_rb = [abs(r[6]) for r in rows if r[6] == r[6]]
+    max_rb = max(abs_rb) if abs_rb else np.nan
+    rb_mde = mde_rank_biserial()
+    lines.append(
+        f"\n**{n_sig}/{len(rows)} layers FDR<0.05; sel>ctrl in {n_pos}/{len(rows)} layers. "
+        f"Largest |rb| = {max_rb:.3f}, well under the design's minimum detectable |rb| "
+        f"≈ {rb_mde:.2f}** (n=100/100, two-sided α=0.05, 80% power; Noether's WMW "
+        "formula). The MDE is a post-hoc DESIGN bound, not observed power; it uses nominal "
+        "α, so under BH-FDR the truly detectable effect is only larger — i.e. this is "
+        "a conservative upper bound on any hidden selected-vs-random difference, not proof of "
+        "none.\n")
     return n_sig, n_pos
 
 
@@ -138,7 +167,7 @@ def main():
     lines = ["*AI-assistance disclosure: see [`AI_ASSISTANCE.md`](./AI_ASSISTANCE.md).*\n",
               "# Dead-Salmon Random-Direction Control\n"]
     lines.append("Tests DIRECTION-specificity of the suppression off-manifold "
-                 "effect (complement to `step3_reconstruction_error.md`'s sign-specificity): do the "
+                 "effect (complement to `reconstruction_error.md`'s sign-specificity): do the "
                  "paper's SELECTED max-activating features fall further off-manifold than a random "
                  "per-layer POOL of SAE dictionary latents steered identically, or is the collapse "
                  "generic (a dead salmon)?\n")
@@ -224,12 +253,12 @@ def main():
     lines.append("\n## Summary interpretation\n_Fill in: per sign, in how many layers do selected "
                  "features fall significantly further off-manifold than the random control pool "
                  "(direction-specific) vs. indistinguishable (dead salmon)? Does any survival "
-                 "concentrate in the layer band flagged in `step3_reconstruction_error.md`? Do the "
+                 "concentrate in the layer band flagged in `reconstruction_error.md`? Do the "
                  "4 candidates sit inside their layer's control distribution (pctile near 50%) — "
                  "failing the specificity test — consistent with the artifact reading in "
-                 "`step3_reconstruction_error.md` / `step4_coherence_spotcheck.md`?_\n")
+                 "`reconstruction_error.md` / `step4_coherence_spotcheck.md`?_\n")
 
-    out = f"{REPORT_DIR}/step2_dead_salmon.md"
+    out = f"{REPORT_DIR}/dead_salmon.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"Wrote {out}")
