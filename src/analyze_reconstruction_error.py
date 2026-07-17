@@ -192,7 +192,7 @@ def main():
                  "or exceeds it (sign-specific), whether the zero-ablation anchor already shows the "
                  "effect, and whether the decision gate for the 'true suppression' extension opens._\n")
 
-    out = f"{REPORT_DIR}/step3_reconstruction_error.md"
+    out = f"{REPORT_DIR}/reconstruction_error.md"
     with open(out, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
     print(f"\nWrote {out}")

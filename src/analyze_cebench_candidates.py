@@ -35,8 +35,8 @@ import numpy as np
 
 CACHE_DIR = "data/cebench"
 CANDIDATES_PATH = "data/features/spot_check_reversal_candidates.json"
-REPORT = "reports/step6_cebench_crosscheck.md"
-OUT_JSON = "data/output_scores/step6_cebench_metrics.json"
+REPORT = "reports/cebench_crosscheck.md"
+OUT_JSON = "data/output_scores/cebench_metrics.json"
 
 
 def zscore_rows(x):

@@ -36,8 +36,8 @@ import numpy as np
 from scipy.stats import mannwhitneyu
 
 GEN_DIR = "data/generated_texts/gemma_2b"
-OUT_JSON = "data/output_scores/step5_degeneracy_metrics.json"
-REPORT = "reports/step5_degeneracy_metrics.md"
+OUT_JSON = "data/output_scores/degeneracy_metrics.json"
+REPORT = "reports/degeneracy_metrics.md"
 CANDIDATES_PATH = "data/features/spot_check_reversal_candidates.json"
 
 # condition tag -> (cache basename suffix, signed s)
